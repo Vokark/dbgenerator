@@ -1,4 +1,4 @@
-# dbgenerator
+# DB Generator
 
 ## Description:
 
