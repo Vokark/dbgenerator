@@ -61,8 +61,10 @@ db_generation.log is added for debug purposes.
 
 This program generates 3 files:
 
-1. db_generation.log: Log file, if you have any issue, you can see here the problem (some of them :D).
+1. db_generation.log: Log file, if you have any issue, you can see the problem here (or some of them :D).
 1. database_structure.sql: Database file that can be imported into mysql/mariadb server.
-1. variable_mappint.txt: if you randomize values, the new names will be here. Or if you use "--not-random" in command line, you can see new database user ahd password here.
+1. variable_mappint.txt: if you randomize values, the new names will be here. Or if you use "--not-random" in command line, you can see new database user and password here.
+
+Note that database_structure.sql will only create database, table or user names if they do not exist before.
 
 Enjoy!
