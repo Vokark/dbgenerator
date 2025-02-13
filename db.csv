@@ -1,0 +1,9 @@
+﻿type;depends;name;valtype;length;nn;ai;pk;uq;default;comment
+db;;exampledb;;;;;;;;Example comment
+table;exampledb;exampletable;;;;;;;;Example table
+column;exampletable;rowid;int;;x;1;X;true;;x, 1, X and true are valid values
+column;exampletable;rowname;varchar;20;x;;;;name;Example row name
+table;exampledb;ex2table;;;;;;;;Example table 2
+column;ex2table;ex2rowid;int;;x;x;x;x;;Example rowid
+column;ex2table;ex2date;date;;;;;;NOW();Example date
+column;ex2table;ex2timestamp;timestamp;;;;;;CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
