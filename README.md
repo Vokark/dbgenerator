@@ -7,7 +7,9 @@ This program can generate random database, table, and column names. To avoid tha
 
 The first line of CSV file can be "type;depends;name;valtype;length;nn;ai;pk;uq;default;comment" or "type,depends,name,valtype,length,nn,ai,pk,uq,default,comment" if you use ";" in first line, all document **MUST** use ";" as separator, if you use "," all document **MUST** use ",".
 
-## CSV Columns:
+## CSV:
+
+CSV file db.csv was created in Excel, so it has BOM bytes at the beginning of the file. If you see it with less, you can see type field has an odd "space" before; this Python program removes those bytes, so don't worry, you can delete them or use commas as well. All that is supported.
 
 type: Field type; it can be "db", "database", "table" or "column".
 depends: You need to declare here from what value this depends on, e.g., the database name is testdb, tables depend on testdb, and columns depend on tables, so you need to put the table name. 
