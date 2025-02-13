@@ -29,7 +29,9 @@ You can see it in the example db.csv file in this repo.
 ```bash
 git clone https://github.com/Vokark/dbgenerator
 cd dbgenerator
-python3 dbgenerator --csv database.csv --not-random
+python3 dbgenerator --csv /path/to/database.csv --not-random
+
+sudo mysql -uroot < database_structure.sql
 ```
 
 If you need a type that is not defined in python program, you can add at db_types dicctionary and put if it has length True or False, that means that value can have length value like varchar ex VARCHAR(20) but put type and lenght in corresponding column in CSV file:
@@ -55,3 +57,12 @@ Username and password are randomly generated. You can see it in database_structu
 
 db_generation.log is added for debug purposes.
 
+## Output files:
+
+This program generates 3 files:
+
+1. db_generation.log: Log file, if you have any issue, you can see here the problem (some of them :D).
+1. database_structure.sql: Database file that can be imported into mysql/mariadb server.
+1. variable_mappint.txt: if you randomize values, the new names will be here. Or if you use "--not-random" in command line, you can see new database user ahd password here.
+
+Enjoy!
