@@ -34,20 +34,6 @@ def remove_bom(file_path):
 def generate_random_name(length=8):
     return random.choice(string.ascii_lowercase) + ''.join(random.choices(string.ascii_lowercase + string.digits, k=length-1))
 
-def generate_random_user(length=10):
-    return ''.join(random.choices(string.ascii_letters, k=length))
-
-def generate_random_password(length=20):
-    chars = string.ascii_letters + string.digits + "-_.,"
-    password = (
-        random.choice(string.ascii_uppercase) +
-        random.choice(string.ascii_lowercase) +
-        random.choice(string.digits) +
-        random.choice("-_.,") +
-        ''.join(random.choices(chars, k=length - 4))
-    )
-    return password if password[-1] in string.ascii_letters else password[:-1] + random.choice(string.ascii_letters)
-
 def process_csv(file_path):
     try:
         remove_bom(file_path)
@@ -78,7 +64,8 @@ def main():
     variable_definitions = []
     current_table = None
     table_columns = []
-    user_statements = []
+    primary_keys = []
+    unique_columns = []
     
     for column in csv_data:
         column_type = column.get('type', '').strip().lower()
@@ -95,24 +82,22 @@ def main():
         
         if column_type == "db":
             name_mapping[name] = random_name
-            sql_statements.append(f"CREATE DATABASE IF NOT EXISTS `{random_name}` DEFAULT CHARACTER SET utf8 COLLATE utf8_bin ;")
+            sql_statements.append(f"CREATE DATABASE IF NOT EXISTS `{random_name}` DEFAULT CHARACTER SET utf8 COLLATE utf8_bin;")
             sql_statements.append(f"USE `{random_name}`;")
             variable_definitions.append(f"DB_{name.upper()}={random_name}")
             logging.info(f"Database created: {random_name}")
-            
-            user = generate_random_user()
-            password = generate_random_password()
-            user_statements.append(f"CREATE USER IF NOT EXISTS '{user}'@'%' IDENTIFIED BY '{password}';")
-            user_statements.append(f"GRANT ALL PRIVILEGES ON `{random_name}`.* TO '{user}'@'%';")
-            user_statements.append("FLUSH PRIVILEGES;")
-            variable_definitions.append(f"DB_USER={user}")
-            variable_definitions.append(f"DB_PASSWORD={password}")
         
         elif column_type == "table":
             if current_table and table_columns:
-                sql_statements.append(",\n".join(table_columns).rstrip(',') + "\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;")
+                if primary_keys:
+                    table_columns.append(f"  PRIMARY KEY ({', '.join(primary_keys)})")
+                if unique_columns:
+                    table_columns.append(f"  UNIQUE INDEX ({', '.join(unique_columns)})")
+                sql_statements.append(",\n".join(table_columns) + "\n) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_bin;")
                 logging.info(f"Table completed: {current_table}")
                 table_columns = []
+                primary_keys = []
+                unique_columns = []
             
             if depends in name_mapping:
                 db_name = name_mapping[depends]
@@ -129,15 +114,23 @@ def main():
                 column_type = column_type if column_type in db_types else "varchar"
                 length = f"({column.get('length', '').strip()})" if db_types[column_type]["has_length"] and column.get('length', '').strip() else ""
                 not_null = " NOT NULL" if column.get('nn', '').strip().lower() in ["1", "true", "x"] else " NULL"
+                auto_increment = " AUTO_INCREMENT" if column.get('ai', '').strip().lower() in ["1", "true", "x"] else ""
                 default = f" DEFAULT {column.get('default', '').strip()}" if column.get('default', '').strip() else ""
                 comment = f" COMMENT '{column.get('comment', '').strip()}'" if column.get('comment', '').strip() else ""
-                column_definition = f"  `{random_name}` {column_type.upper()}{length}{not_null}{default}{comment}"
+                
+                column_definition = f"  `{random_name}` {column_type.upper()}{length}{not_null}{auto_increment}{default}{comment}"
                 table_columns.append(column_definition)
+                if column.get('pk', '').strip().lower() in ["1", "true", "x"]:
+                    primary_keys.append(random_name)
+                if column.get('uq', '').strip().lower() in ["1", "true", "x"]:
+                    unique_columns.append(random_name)
     
     if current_table and table_columns:
-        sql_statements.append(",\n".join(table_columns).rstrip(',') + "\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;")
-    
-    sql_statements.extend(user_statements)
+        if primary_keys:
+            table_columns.append(f"  PRIMARY KEY ({', '.join(primary_keys)})")
+        if unique_columns:
+            table_columns.append(f"  UNIQUE INDEX ({', '.join(unique_columns)})")
+        sql_statements.append(",\n".join(table_columns) + "\n) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_bin;")
     
     if sql_statements:
         with open("database_structure.sql", "w", encoding="utf-8") as sql_file:
@@ -153,3 +146,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
